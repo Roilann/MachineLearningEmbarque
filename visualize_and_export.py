@@ -48,7 +48,7 @@ column_value = int(input("Enter a value (0 or 1) for the new column: "))
 data_to_export['State'] = column_value
 
 # Select only the columns you want to export
-columns_to_export = ['T [ms]', 'AccX [mg]', 'AccY [mg]', 'AccZ [mg]', 'State']
+columns_to_export = ['AccX [mg]', 'AccY [mg]', 'AccZ [mg]', 'State']
 data_to_export = data_to_export[columns_to_export]
 
 # Export data to a new CSV file
