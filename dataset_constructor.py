@@ -46,7 +46,6 @@ plt.xlabel('Point number')
 plt.ylabel('State')
 plt.title('Dataset state')
 
-plt.legend()
 plt.grid(True)
 plt.show()
 
