@@ -4,6 +4,13 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
+def strike(text):
+    result = ''
+    for c in text:
+        result = result + c + '\u0336'
+    return result
+
+
 def print_dataset(dataset, title: str = 'Dataset state'):
     plt.figure(figsize=(10, 6))
     plt.subplot(2, 1, 1)
@@ -23,9 +30,9 @@ def print_dataset(dataset, title: str = 'Dataset state'):
     plt.show()
 
 
-files = [f for f in pathlib.Path().glob("./output/*.csv")]
-for index, file in enumerate(files):
-    print(f"{index} - {file}")
+files_path = [f for f in pathlib.Path().glob("./output/*.csv")]
+for index, file_path in enumerate(files_path):
+    print(f"{index} - {file_path}")
 
 headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
 dataset = pd.DataFrame()
@@ -36,22 +43,17 @@ while True:
     if entry.lower() == 'exit' or entry.lower() == '':
         break
 
-    file_selected = files[int(entry)]
-    print(f"File selected: {file_selected}")
+    file_selected = files_path[int(entry)]
 
     data = pd.read_csv(file_selected, usecols=headers)
-    print_dataset(data, 'File selected: ' + file_selected.name)
+    if data.shape[0] % 100:
+        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        continue
+    else:
+        print(f"File selected: {file_selected.name}")
 
     action = input("Do you want to add this values in the dataset (Y/n): ")
-    if action.lower() == 'y' or action.lower() == 'yes':
-        # Padding ou troncature des données
-        if data.shape[0] < 100:
-            # Créer un DataFrame de padding avec les mêmes en-têtes
-            padding = pd.DataFrame(np.zeros((100 - data.shape[0], len(headers))), columns=headers)
-            data = pd.concat([data, padding], ignore_index=True)
-        elif data.shape[0] > 100:
-            data = data.iloc[:100]
-
+    if action.lower() == 'y' or action.lower() == 'yes' or action.lower() == '':
         dataset = pd.concat([dataset, data], ignore_index=True)
         print_dataset(dataset, 'Actual dataset')
 
