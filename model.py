@@ -63,7 +63,6 @@ model = tf.keras.models.Sequential([
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.5),
               loss='binary_crossentropy', metrics=['accuracy'])
 
-# Résumé du modèle
 # model.summary()
 
 model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=100, batch_size=10, validation_split=0, verbose=0)
@@ -72,3 +71,14 @@ model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=100, batch_siz
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
 print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
+
+# save the model
+model_name = input("Do you want to save the model? (File name/n) ")
+if model_name != "n" and model_name != "":
+    model.save('models/' + model_name + '.h5')
+
+    model_structure = model.to_json()
+    with open("models/" + model_name + ".json", "w") as json_file:
+        json_file.write(model_structure)
+
+    print("Model saved.")
