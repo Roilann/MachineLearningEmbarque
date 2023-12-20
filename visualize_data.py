@@ -8,11 +8,15 @@ import os
 def verify_folder_input(user_input_folder):
     folder_authorized = False
     output = None
-    if user_input_folder == 'input' or user_input_folder == 'in':
+    if user_input_folder == 'input' or user_input_folder == 'in' or user_input_folder == 'i':
         output = "input"
         folder_authorized = True
-    elif user_input_folder == 'output' or user_input_folder == 'out':
+    elif user_input_folder == 'output' or user_input_folder == 'out' or user_input_folder == 'o':
         output = "output"
+        folder_authorized = True
+    elif (user_input_folder == 'dataset' or user_input_folder == 'data'
+          or user_input_folder == 'datasets' or user_input_folder == 'd'):
+        output = "datasets"
         folder_authorized = True
 
     return folder_authorized, output
@@ -133,7 +137,7 @@ if folder_flag:
             plt.show()
 
         # Plot Movement Points (if output folder)
-        if directory == 'output':
+        if directory == 'output' or directory == 'datasets':
             movement_indices = df[df['State'] == 1].index
             plt.figure(figsize=(12, 6))
             plt.plot(temps, acceleration_x, label='AccX')
