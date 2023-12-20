@@ -1,3 +1,4 @@
+import os
 import time
 
 import pandas as pd
@@ -20,14 +21,15 @@ seed = int(time.time())
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
-raw_dataset = pd.read_csv('datasets/dataset.csv').values
+dataset_to_load = input("Specify the name of the dataset to load: ")
+raw_dataset = pd.read_csv('datasets/' + dataset_to_load + '.csv').values
 
 E_raw_dataset = raw_dataset[:, :-1]
 Y_raw_dataset = raw_dataset[:, -1]
 
 # Vérification si la longueur de raw_dataset est un multiple de 200
 if len(raw_dataset) % DATA_POINTS != 0:
-    raise ValueError("Le nombre de lignes dans le fichier CSV n'est pas un multiple de 200.")
+    raise ValueError(f"Le nombre de lignes dans le fichier CSV n'est pas un multiple de {DATA_POINTS}.")
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 E_raw_dataset = scaler.fit_transform(E_raw_dataset)
@@ -65,7 +67,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.5),
 
 # model.summary()
 
-model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=100, batch_size=10, validation_split=0, verbose=0)
+model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=400, batch_size=30, validation_split=0.2)
 
 # evaluate the model
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
@@ -75,10 +77,11 @@ print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
 # save the model
 model_name = input("Do you want to save the model? (File name/n) ")
 if model_name != "n" and model_name != "":
-    model.save('models/' + model_name + '.h5')
+    os.mkdir(model_name)
+    model.save('models/' + model_name + '/' + model_name + '.h5')
 
     model_structure = model.to_json()
-    with open("models/" + model_name + ".json", "w") as json_file:
+    with open('models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
 
     print("Model saved.")
