@@ -1,5 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
+# Make them global so it can save the file
+t_min = 0
+t_max = 0
 
 # Read the specified file
 file_name = input("Enter the file name: ")
@@ -52,7 +57,14 @@ columns_to_export = ['AccX [mg]', 'AccY [mg]', 'AccZ [mg]', 'State']
 data_to_export = data_to_export[columns_to_export]
 
 # Export data to a new CSV file
-export_file_name = input("Enter the name of the CSV file for export: ")
-data_to_export.to_csv('output/' + export_file_name + '.csv', index=False, header=True)
+saved_min = int(t_min/1000)
+saved_max = int(t_max/1000)
 
-print(f"Data exported to file '{export_file_name}'.")
+saved_filename = file_name + '_' + str(saved_min) + 'k_' + str(saved_max) + "k"
+accept_name = input(f"Do you accept the file name {saved_filename} (y/n)")
+if accept_name == 'y':
+    data_to_export.to_csv('output/' + saved_filename + '.csv', index=False, header=True)
+else:
+    saved_filename = input("Enter the name of the CSV file for export: ")
+
+print(f"Data exported to file '{saved_filename}'.")
