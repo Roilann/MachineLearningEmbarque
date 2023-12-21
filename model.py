@@ -7,6 +7,7 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from tensorflow.python.keras.regularizers import l2
 
 
 DATA_POINTS = 100
@@ -53,12 +54,16 @@ Y_dataset = np.asarray(Y_dataset)
 
 E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset, test_size=0.2,
                                                                                     random_state=seed)
+# l2_regularizer = l2(0.01)
+l2_regularizer = None
+
+# L'ajout de EarlyStopping et ReduceLROnPlateau peut être intéressant
 model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(DATA_POINTS, activation='relu', input_shape=(E_train_dataset.shape[1], E_train_dataset.shape[2])),
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(50, activation='relu'),
+    tf.keras.layers.Dense(50, activation='relu', kernel_regularizer=l2_regularizer),
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(25, activation='relu'),
+    tf.keras.layers.Dense(25, activation='relu', kernel_regularizer=l2_regularizer),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
@@ -73,14 +78,14 @@ model.compile(optimizer=rms_optimizer,
 
 # model.summary()
 
-history = model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=200, batch_size=20, validation_split=0.2)
+history = model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=200, batch_size=15, validation_split=0.2)
 
 # evaluate the model
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
 print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
-#plot figure
+# plot figure
 plt.figure()
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
