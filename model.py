@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -62,26 +63,69 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.5),
-              loss='binary_crossentropy', metrics=['accuracy'])
+adam_optimizer = tf.keras.optimizers.Adam(learning_rate=0.5)
+sgd_optimizer = tf.keras.optimizers.SGD(learning_rate=0.5, momentum=0.2, weight_decay=0.0)
+rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
+
+model.compile(optimizer=rms_optimizer,
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
 
 # model.summary()
 
-model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=400, batch_size=30, validation_split=0.2)
+history = model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=200, batch_size=20, validation_split=0.2)
 
 # evaluate the model
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
 print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
+#plot figure
+plt.figure()
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Val'], loc='upper left')
+plt.show()
+
+plt.figure()
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Val'], loc='upper left')
+plt.show()
+# Plot training & validation loss values
+
 # save the model
 model_name = input("Do you want to save the model? (File name/n) ")
 if model_name != "n" and model_name != "":
-    os.mkdir(model_name)
+    os.makedirs('models/' + model_name, exist_ok=True)
     model.save('models/' + model_name + '/' + model_name + '.h5')
 
     model_structure = model.to_json()
     with open('models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
+
+    plt.figure()
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.savefig('models/' + model_name + '/' + model_name + '_accuracy_plot.png')
+
+    plt.figure()
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.savefig('models/' + model_name + '/' + model_name + '_loss_plot.png')
 
     print("Model saved.")
