@@ -35,7 +35,8 @@ while True:
 
     # Filter data for the specified time range
     filtered_data = data[(data['T [ms]'] >= t_min) & (data['T [ms]'] <= t_max)]
-    data_to_export = pd.concat([data_to_export, filtered_data])
+    data_to_export = filtered_data.copy()
+
     print(f"Number of selected rows: {len(filtered_data)}")
 
     plt.figure(figsize=(10, 6))
