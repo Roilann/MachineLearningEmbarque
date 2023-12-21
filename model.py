@@ -97,6 +97,9 @@ metrics_binary_accuracy = [tf.keras.metrics.BinaryAccuracy()]
 metrics_auc = [tf.keras.metrics.AUC()]
 # non pertinent pour le moment
 metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
+# Des pics étaient observés avec metrics_auc et dataset_v1, donc nous avons essayer precision et recall mais résultats
+# plus mauvais. Nous n'avons pas encore essayé de modifié les paramètres de ces fonction
+metric_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
 
 model.compile(optimizer=rms_optimizer,
               loss='binary_crossentropy',
@@ -119,10 +122,19 @@ print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
 
 # plot figure
 plt.figure()
-plt.plot(history.history['auc'])
-plt.plot(history.history['val_auc'])
-plt.title('Model auc')
-plt.ylabel('Auc')
+plt.plot(history.history['recall'])
+plt.plot(history.history['val_recall'])
+plt.title('Model recall')
+plt.ylabel('Recall')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Val'], loc='upper left')
+plt.show()
+
+plt.figure()
+plt.plot(history.history['precision'])
+plt.plot(history.history['val_precision'])
+plt.title('Model precision')
+plt.ylabel('Precision')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
