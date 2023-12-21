@@ -4,10 +4,11 @@ import time
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+from keras.src.callbacks import ReduceLROnPlateau, EarlyStopping
+from keras.src.regularizers import l2
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.python.keras.regularizers import l2
 
 
 DATA_POINTS = 100
@@ -54,10 +55,28 @@ Y_dataset = np.asarray(Y_dataset)
 
 E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset, test_size=0.2,
                                                                                     random_state=seed)
-# l2_regularizer = l2(0.01)
-l2_regularizer = None
+# non pertinent pour le moment
+l2_regularizer = l2(0.01)
+# l2_regularizer = None
 
 # L'ajout de EarlyStopping et ReduceLROnPlateau peut être intéressant
+early_stopping = EarlyStopping(
+    monitor='val_loss',
+    patience=40,
+    verbose=1,
+    mode='min',
+    restore_best_weights=True
+)
+
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.2,
+    patience=20,
+    verbose=1,
+    mode='min',
+    min_lr=0.001
+)
+
 model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(DATA_POINTS, activation='relu', input_shape=(E_train_dataset.shape[1], E_train_dataset.shape[2])),
     tf.keras.layers.Dropout(0.2),
@@ -72,13 +91,26 @@ adam_optimizer = tf.keras.optimizers.Adam(learning_rate=0.5)
 sgd_optimizer = tf.keras.optimizers.SGD(learning_rate=0.5, momentum=0.2, weight_decay=0.0)
 rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
 
+metrics_accuracy = ['accuracy']
+# non pertinent pour le moment
+metrics_binary_accuracy = [tf.keras.metrics.BinaryAccuracy()]
+metrics_auc = [tf.keras.metrics.AUC()]
+# non pertinent pour le moment
+metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
+
 model.compile(optimizer=rms_optimizer,
               loss='binary_crossentropy',
-              metrics=['accuracy'])
+              metrics=metrics_auc)
 
 # model.summary()
 
-history = model.fit(E_train_dataset, Y_train_dataset, shuffle=False, epochs=200, batch_size=15, validation_split=0.2)
+history = model.fit(E_train_dataset,
+                    Y_train_dataset,
+                    shuffle=False,
+                    epochs=200,
+                    batch_size=20,
+                    validation_split=0.2,
+                    callbacks=[early_stopping, reduce_lr])
 
 # evaluate the model
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
@@ -87,10 +119,10 @@ print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
 
 # plot figure
 plt.figure()
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('Model accuracy')
-plt.ylabel('Accuracy')
+plt.plot(history.history['auc'])
+plt.plot(history.history['val_auc'])
+plt.title('Model auc')
+plt.ylabel('Auc')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
@@ -116,13 +148,13 @@ if model_name != "n" and model_name != "":
         json_file.write(model_structure)
 
     plt.figure()
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
+    plt.plot(history.history['auc'])
+    plt.plot(history.history['val_auc'])
+    plt.title('Model auc')
+    plt.ylabel('Auc')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('models/' + model_name + '/' + model_name + '_accuracy_plot.png')
+    plt.savefig('models/' + model_name + '/' + model_name + '_auc_plot.png')
 
     plt.figure()
     plt.plot(history.history['loss'])
