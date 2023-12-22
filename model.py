@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-
+# Minimum amount of points to determine if the movement is swinging or not
 DATA_POINTS = 100
 
 
@@ -103,7 +103,7 @@ metric_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall
 
 model.compile(optimizer=rms_optimizer,
               loss='binary_crossentropy',
-              metrics=metrics_auc)
+              metrics=metric_precision_recall)
 
 # model.summary()
 
