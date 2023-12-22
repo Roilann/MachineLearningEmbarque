@@ -55,11 +55,10 @@ Y_dataset = np.asarray(Y_dataset)
 
 E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset, test_size=0.2,
                                                                                     random_state=seed)
-# non pertinent pour le moment
 l2_regularizer = l2(0.01)
 # l2_regularizer = None
 
-# L'ajout de EarlyStopping et ReduceLROnPlateau peut être intéressant
+# L'ajout de EarlyStopping dans l'optique d'arrêter un mauvais apprentissage et donc de gagner du temps
 early_stopping = EarlyStopping(
     monitor='val_loss',
     patience=40,
@@ -68,6 +67,7 @@ early_stopping = EarlyStopping(
     restore_best_weights=True
 )
 
+# L'ajout de ReduceLROnPlateau est a essayer pour voir si cela améliore les résultats
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss',
     factor=0.2,
@@ -160,13 +160,22 @@ if model_name != "n" and model_name != "":
         json_file.write(model_structure)
 
     plt.figure()
-    plt.plot(history.history['auc'])
-    plt.plot(history.history['val_auc'])
-    plt.title('Model auc')
-    plt.ylabel('Auc')
+    plt.plot(history.history['recall'])
+    plt.plot(history.history['val_recall'])
+    plt.title('Model recall')
+    plt.ylabel('Recall')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('models/' + model_name + '/' + model_name + '_auc_plot.png')
+    plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
+
+    plt.figure()
+    plt.plot(history.history['precision'])
+    plt.plot(history.history['val_precision'])
+    plt.title('Model precision')
+    plt.ylabel('Precision')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.savefig('models/' + model_name + '/' + model_name + '_precision_plot.png')
 
     plt.figure()
     plt.plot(history.history['loss'])
