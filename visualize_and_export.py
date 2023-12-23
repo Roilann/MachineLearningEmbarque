@@ -63,9 +63,9 @@ saved_max = int(t_max/1000)
 
 saved_filename = file_name + '_' + str(saved_min) + 'k_' + str(saved_max) + "k"
 accept_name = input(f"Do you accept the file name {saved_filename} (y/n)")
-if accept_name == 'y':
-    data_to_export.to_csv('output/' + saved_filename + '.csv', index=False, header=True)
-else:
+if accept_name != 'y':
     saved_filename = input("Enter the name of the CSV file for export: ")
+
+data_to_export.to_csv('output/' + saved_filename + '.csv', index=False, header=True)
 
 print(f"Data exported to file '{saved_filename}'.")
