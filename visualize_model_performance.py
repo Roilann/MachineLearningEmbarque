@@ -73,60 +73,59 @@ for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
 
 while True:
-    while True:
-        entry = input("Enter the id of the file you want to test or 'exit' to exit:")
+    entry = input("Enter the id of the file you want to test or 'exit' to exit:")
 
-        if entry.lower() == 'exit' or entry.lower() == '':
-            break
+    if entry.lower() == 'exit' or entry.lower() == '':
+        break
 
-        file_selected = files_path[int(entry)]
+    file_selected = files_path[int(entry)]
 
-        data = pd.read_csv(file_selected, usecols=headers)
-        if data.shape[0] % 100:
-            print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
-            continue
-        else:
-            print(f"File selected: {file_selected.name}")
+    data = pd.read_csv(file_selected, usecols=headers)
+    if data.shape[0] % 100:
+        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        continue
+    else:
+        print(f"File selected: {file_selected.name}")
 
-        print_dataset(data)
+    print_dataset(data)
 
-        data = data.values
-        dataset_count = len(data) // 100
+    data = data.values
+    dataset_count = len(data) // 100
 
-        E_raw_dataset = data[:, :-1]
-        Y_raw_dataset = data[:, -1]
+    E_raw_dataset = data[:, :-1]
+    Y_raw_dataset = data[:, -1]
 
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        E_raw_dataset = scaler.fit_transform(E_raw_dataset)
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    E_raw_dataset = scaler.fit_transform(E_raw_dataset)
 
-        E_datasets = np.array_split(E_raw_dataset, dataset_count)
-        Y_datasets = np.array_split(Y_raw_dataset, dataset_count)
-        Y_datasets = [lot[0] for lot in Y_datasets]
+    E_datasets = np.array_split(E_raw_dataset, dataset_count)
+    Y_datasets = np.array_split(Y_raw_dataset, dataset_count)
+    Y_datasets = [lot[0] for lot in Y_datasets]
 
-        print("Processing ...")
+    print("Processing ...")
 
-        for E_index, E_dataset in enumerate(E_datasets):
-            for model_index, model in enumerate(models):
-                E_dataset_expand = np.expand_dims(E_dataset, axis=0)
-                result = model.predict(E_dataset_expand, verbose=0)
-
-                if (result[0][0] >= 0.5) == Y_datasets[E_index]:
-                    results[model_index]['result'] = results[model_index]['result'] + 1
-
-        scores_to_show = []
-        models_to_show = []
-
+    for E_index, E_dataset in enumerate(E_datasets):
         for model_index, model in enumerate(models):
-            scores_to_show.append((results[model_index]['result'] / dataset_count) * 100)
-            models_to_show.append(str(results[model_index]['id']))
+            E_dataset_expand = np.expand_dims(E_dataset, axis=0)
+            result = model.predict(E_dataset_expand, verbose=0)
 
-            plt.bar(models_to_show, scores_to_show)
-            for i in range(len(models_to_show)):
-                plt.text(i, scores_to_show[i], str(round(scores_to_show[i])) + ' %', ha='center')
+            if (result[0][0] >= 0.5) == Y_datasets[E_index]:
+                results[model_index]['result'] = results[model_index]['result'] + 1
 
-            plt.title('Performances of differents models')
-            plt.xlabel('Models id')
-            plt.ylabel('Scores (%)')
-            plt.show()
+    scores_to_show = []
+    models_to_show = []
 
-            results[model_index]['result'] = 0
+    for model_index, model in enumerate(models):
+        scores_to_show.append((results[model_index]['result'] / dataset_count) * 100)
+        models_to_show.append(str(results[model_index]['id']))
+
+        plt.bar(models_to_show, scores_to_show)
+        for i in range(len(models_to_show)):
+            plt.text(i, scores_to_show[i], str(round(scores_to_show[i])) + ' %', ha='center')
+
+        plt.title('Performances of differents models')
+        plt.xlabel('Models id')
+        plt.ylabel('Scores (%)')
+        plt.show()
+
+        results[model_index]['result'] = 0
