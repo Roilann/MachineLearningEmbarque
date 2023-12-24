@@ -1,4 +1,3 @@
-import json
 import pathlib
 
 import numpy as np
@@ -63,6 +62,7 @@ while True:
         'global_result': 0,
         'global_non_pendulum': 0,
         'global_pendulum': 0,
+        'result_per_dataset': [],
     })
 
 headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
@@ -82,16 +82,14 @@ while True:
 
     file_selected = files_path[int(entry)]
 
-    data = pd.read_csv(file_selected, usecols=headers)
-    if data.shape[0] % 100:
-        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+    csv_data = pd.read_csv(file_selected, usecols=headers)
+    if csv_data.shape[0] % 100:
+        print(f"File {file_selected} has {csv_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
         continue
     else:
         print(f"File selected: {file_selected.name}")
 
-    print_dataset(data)
-
-    data = data.values
+    data = csv_data.values
     dataset_count = len(data) // 100
 
     E_raw_dataset = data[:, :-1]
@@ -114,6 +112,7 @@ while True:
             E_dataset_expand = np.expand_dims(E_dataset, axis=0)
             result = model.predict(E_dataset_expand, verbose=0)
 
+            result_per_dataset = (result[0][0] >= 0.5)
             if (result[0][0] >= 0.5) == Y_datasets[E_index]:
                 results[model_index]['global_result'] = results[model_index]['global_result'] + 1
 
@@ -121,6 +120,11 @@ while True:
                 results[model_index]['global_pendulum'] = results[model_index]['global_pendulum'] + 1
             else:
                 results[model_index]['global_non_pendulum'] = results[model_index]['global_non_pendulum'] + 1
+
+            result_per_dataset = np.full(100, result_per_dataset).tolist()
+
+            results[model_index]['result_per_dataset'] = np.concatenate((results[model_index]['result_per_dataset'],
+                                                                         result_per_dataset), axis=0)
 
     global_scores_to_show = []
     global_pendulum_scores_to_show = []
@@ -133,58 +137,84 @@ while True:
         global_non_pendulum_scores_to_show.append(round((results[model_index][
                                                              'global_non_pendulum'] / non_penulum_count) * 100))
 
-        # Largeur des barres
-        barWidth = 0.3
-
-        # Positions des barres
-        show_global_scores = np.arange(len(global_scores_to_show))
-        show_global_pendulum_scores = [x + barWidth for x in show_global_scores]
-        show_global_non_pendulum_scores = [x + barWidth for x in show_global_pendulum_scores]
-
         models_to_show.append(str(results[model_index]['id']))
-
-        global_scores_bar = plt.bar(show_global_scores,
-                                    global_scores_to_show,
-                                    color='blue',
-                                    width=barWidth,
-                                    edgecolor='grey',
-                                    label='Global score')
-        global_pendulum_scores_bar = plt.bar(show_global_pendulum_scores,
-                                             global_pendulum_scores_to_show,
-                                             color='red',
-                                             width=barWidth,
-                                             edgecolor='grey',
-                                             label='Pendulum score')
-        global_non_pendulum_scores_bar = plt.bar(show_global_non_pendulum_scores,
-                                                 global_non_pendulum_scores_to_show,
-                                                 color='green',
-                                                 width=barWidth,
-                                                 edgecolor='grey',
-                                                 label='Non pendulum score')
-
-
-        def add_labels(bars):
-            for bar in bars:
-                height = bar.get_height()
-                plt.annotate('{}{}'.format(height, " %"),
-                             xy=(bar.get_x() + bar.get_width() / 2, height),
-                             xytext=(0, 3),
-                             textcoords="offset points",
-                             ha='center', va='bottom')
-
-
-        add_labels(global_scores_bar)
-        add_labels(global_pendulum_scores_bar)
-        add_labels(global_non_pendulum_scores_bar)
-
-        plt.xlabel('Models id')
-        plt.xticks([r + barWidth / 2 for r in range(len(show_global_scores))], models_to_show)
-        plt.title(f"Models performance on {file_selected.name} dataset")
-        plt.ylabel('Scores (%)')
-
-        plt.legend()
-        plt.show()
 
         results[model_index]['global_result'] = 0
         results[model_index]['global_pendulum'] = 0
         results[model_index]['global_non_pendulum'] = 0
+
+    bar_width = 0.3
+
+    show_global_scores = np.arange(len(global_scores_to_show))
+    show_global_pendulum_scores = [x + bar_width for x in show_global_scores]
+    show_global_non_pendulum_scores = [x + bar_width for x in show_global_pendulum_scores]
+
+    global_scores_bar = plt.bar(show_global_scores,
+                                global_scores_to_show,
+                                color='blue',
+                                width=bar_width,
+                                edgecolor='grey',
+                                label='Global score')
+    global_pendulum_scores_bar = plt.bar(show_global_pendulum_scores,
+                                         global_pendulum_scores_to_show,
+                                         color='red',
+                                         width=bar_width,
+                                         edgecolor='grey',
+                                         label='Pendulum score')
+    global_non_pendulum_scores_bar = plt.bar(show_global_non_pendulum_scores,
+                                             global_non_pendulum_scores_to_show,
+                                             color='green',
+                                             width=bar_width,
+                                             edgecolor='grey',
+                                             label='Non pendulum score')
+
+
+    def add_labels(bars):
+        for bar in bars:
+            height = bar.get_height()
+            plt.annotate('{}{}'.format(height, " %"),
+                         xy=(bar.get_x() + bar.get_width() / 2, height),
+                         xytext=(0, 3),
+                         textcoords="offset points",
+                         ha='center', va='bottom')
+
+
+    add_labels(global_scores_bar)
+    add_labels(global_pendulum_scores_bar)
+    add_labels(global_non_pendulum_scores_bar)
+
+    plt.xlabel('Models id')
+    plt.xticks([r + bar_width / 2 for r in range(len(show_global_scores))], models_to_show)
+    plt.title(f"Models performance on {file_selected.name} dataset")
+    plt.ylabel('Scores (%)')
+
+    plt.legend()
+    plt.show()
+
+    plt.figure(figsize=(10, 6))
+
+    plt.subplot(3, 1, 1)
+    plt.plot(csv_data['AccX [mg]'], label='AccX as a function of T')
+    plt.plot(csv_data['AccY [mg]'], label='AccY as a function of T')
+    plt.plot(csv_data['AccZ [mg]'], label='AccZ as a function of T')
+    plt.ylabel('Acceleration')
+    plt.legend()
+    plt.title('Models result')
+
+    plt.subplot(3, 1, 2)
+    for model_index in range(len(models)):
+        plt.plot(np.array(results[model_index]['result_per_dataset']), label=f"Model {results[model_index]['id']}")
+        results[model_index]['result_per_dataset'] = []
+    plt.ylabel('Result')
+    plt.legend()
+
+    plt.subplot(3, 1, 3)
+    plt.plot(csv_data['State'], label="Expected results")
+    plt.xlabel('Point number')
+    plt.ylabel('Result')
+    plt.legend()
+
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
