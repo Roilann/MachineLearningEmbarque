@@ -55,3 +55,8 @@ s'appelle dataset_v3_rms_001_bc_e200_b20_vp02_EXPERIMENTAL_metrics_precision_rec
     - Le programme génère le modèle
     - Une fois les courbes visualisée, on peut enregistrer le modèle en lui donnant un nom ou ne pas l'enregistrer
 - Le modèle est enregistré dans le dossier `models`
+- Lancer le programme `visualize_model_performance.py`
+    - Entrer le ou les id des modèles pour lesquel on veut visualiser les performances
+    - Le programme affiche la prédiction
+    - Entrer `exit` pour quitter le programme
+    - Entrer l'id du fichier csv à utiliser pour la prédiction
