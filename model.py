@@ -1,4 +1,5 @@
 import os
+import pathlib
 import time
 
 import pandas as pd
@@ -24,8 +25,19 @@ seed = int(time.time())
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
-dataset_to_load = input("Specify the name of the dataset to load: ")
-raw_dataset = pd.read_csv('datasets/' + dataset_to_load + '.csv').values
+files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset.csv")]
+
+for index, file_path in enumerate(files_path):
+    print(f"{index} - {file_path}")
+
+entry = input("Enter the id of the file you want to test or 'exit' to exit:")
+
+file_selected = files_path[int(entry)]
+
+headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
+raw_dataset = pd.read_csv(file_selected, usecols=headers).values
 
 E_raw_dataset = raw_dataset[:, :-1]
 Y_raw_dataset = raw_dataset[:, -1]

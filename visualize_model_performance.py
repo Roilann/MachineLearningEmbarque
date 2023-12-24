@@ -64,7 +64,11 @@ while True:
     })
 
 headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
+
 files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset.csv")]
+
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
 
