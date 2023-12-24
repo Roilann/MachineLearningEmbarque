@@ -1,4 +1,5 @@
 import pathlib
+import time
 
 import numpy as np
 import pandas as pd
@@ -105,12 +106,25 @@ while True:
     pendulum_cout = len([lot for lot in Y_datasets if lot])
     non_penulum_count = len([lot for lot in Y_datasets if not lot])
 
-    print("Processing ...")
-
+    start_time = time.time()
+    time.sleep(0.2)
     for E_index, E_dataset in enumerate(E_datasets):
+        if E_index % 5 == 0:
+
+            time_elapsed = time.time() - start_time
+            time_for_5_datasets = time_elapsed / (E_index + 1)
+            datasets_remaining = dataset_count - (E_index + 1)
+
+            time_remaining = datasets_remaining * time_for_5_datasets
+
+            minutes = int(time_remaining // 60)
+            seconds = int(time_remaining % 60)
+
+            print(f"\rProcessing dataset {E_index + 1}/{dataset_count}, time remaining: {minutes}:{seconds:02d}", end="")
+
         for model_index, model in enumerate(models):
             E_dataset_expand = np.expand_dims(E_dataset, axis=0)
-            result = model.predict(E_dataset_expand, verbose=0)
+            result = model.predict(E_dataset_expand, verbose=0, use_multiprocessing=True)
 
             result_per_dataset = (result[0][0] >= 0.5)
             if (result[0][0] >= 0.5) == Y_datasets[E_index]:
@@ -125,6 +139,8 @@ while True:
 
             results[model_index]['result_per_dataset'] = np.concatenate((results[model_index]['result_per_dataset'],
                                                                          result_per_dataset), axis=0)
+
+    print()
 
     global_scores_to_show = []
     global_pendulum_scores_to_show = []
