@@ -7,26 +7,6 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
-
-def print_dataset(dataset, title: str = 'Dataset state'):
-    plt.figure(figsize=(10, 6))
-    plt.subplot(2, 1, 1)
-    plt.plot(dataset['AccX [mg]'], label='AccX as a function of T')
-    plt.plot(dataset['AccY [mg]'], label='AccY as a function of T')
-    plt.plot(dataset['AccZ [mg]'], label='AccZ as a function of T')
-    plt.xlabel('Point number')
-    plt.ylabel('Acceleration')
-    plt.title(title)
-
-    plt.subplot(2, 1, 2)
-    plt.plot(dataset['State'])
-    plt.xlabel('Point number')
-    plt.ylabel('State')
-
-    plt.grid(True)
-    plt.show()
-
-
 h5_files_path = [f for f in pathlib.Path().glob("./models/*/*.h5")]
 json_files_path = [f for f in pathlib.Path().glob("./models/*/*.json")]
 
@@ -45,7 +25,7 @@ models = []
 results = []
 
 while True:
-    entry = input("Enter the id of the model you want to add to the dataset or 'exit' to exit:")
+    entry = input("Enter the id of the model you want to add or 'exit' to exit:")
 
     if entry.lower() == 'exit' or entry.lower() == '':
         break
