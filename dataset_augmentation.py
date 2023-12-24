@@ -77,13 +77,6 @@ def apply_temporal_subsampling(data):
     return subsampled_data
 
 
-# Bandpass Filtering
-def apply_bandpass_filter(data, low_cutoff, high_cutoff):
-    # Implement your bandpass filter (e.g., using scipy.signal)
-    # Make sure to adjust the cutoff frequencies based on your data
-    pass
-
-
 # Gaussian Noise
 def apply_gaussian_noise(data, exclude_column='', sigma=1.0):
     blurred_data = data.copy()
@@ -216,8 +209,6 @@ SAVING_DATA_COMPILE = 1
 SAVING_DATA_COMPILE_DATASET = 1
 
 csv_path = "datasets/dataset_v3.csv"
-# csv_path = "input/Balancier_04.csv"
-# csv_path = 'output/balancier_1_5k_15k.csv'
 
 original_data = load_data(csv_path)
 
@@ -293,7 +284,3 @@ if DATA_COMPILE:
             saved_csv = pd.read_csv(saved_path)
             if 'State' in saved_csv.columns:
                 print_dataset(saved_csv, 'After saving the file')
-
-# For bandpass filtering, you'll need to implement or use a specific library.
-
-# Use the augmented data for training your AI model.
