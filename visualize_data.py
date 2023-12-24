@@ -18,6 +18,9 @@ def verify_folder_input(user_input_folder):
           or user_input_folder == 'datasets' or user_input_folder == 'd'):
         output = "datasets"
         folder_authorized = True
+    elif user_input_folder == 'dataset_v3' or user_input_folder == 'data_v3' or user_input_folder == 'd3':
+        output = "datasets/dataset_v3"
+        folder_authorized = True
 
     return folder_authorized, output
 
