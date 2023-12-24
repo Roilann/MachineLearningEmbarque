@@ -121,8 +121,12 @@ while True:
             models_to_show.append(str(results[model_index]['id']))
 
             plt.bar(models_to_show, scores_to_show)
+            for i in range(len(models_to_show)):
+                plt.text(i, scores_to_show[i], str(round(scores_to_show[i])) + ' %', ha='center')
 
             plt.title('Performances of differents models')
             plt.xlabel('Models id')
             plt.ylabel('Scores (%)')
             plt.show()
+
+            results[model_index]['result'] = 0
