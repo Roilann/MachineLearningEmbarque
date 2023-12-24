@@ -140,13 +140,37 @@ def compare_data(data1, data2):
     print("Std:", np.std(data2))
 
 
-def apply_and_visualize(original_data, augmented_data, title):
+def apply_and_visualize(original_data, augmented_data, title, save_path):
     returned_data = augmented_data(original_data)
     if VISUEL:
         visualize_data(original_data, returned_data, title)
     if DEBUG:
         compare_data(original_data, returned_data)
+    if SAVING_DATA_SEPARATE:
+        if returned_data.shape[0] % 100:
+            print(f"File has {returned_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        else:
+            returned_data.to_csv(save_path + f'/{title}' + '.csv', index=False, header=True)
     return returned_data
+
+
+def print_dataset(dataset, title: str = 'Dataset state'):
+    plt.figure(figsize=(10, 6))
+    plt.subplot(2, 1, 1)
+    plt.plot(dataset['AccX [mg]'], label='AccX as a function of T')
+    plt.plot(dataset['AccY [mg]'], label='AccY as a function of T')
+    plt.plot(dataset['AccZ [mg]'], label='AccZ as a function of T')
+    plt.xlabel('Point number')
+    plt.ylabel('Acceleration')
+    plt.title(title)
+
+    plt.subplot(2, 1, 2)
+    plt.plot(dataset['State'])
+    plt.xlabel('Point number')
+    plt.ylabel('State')
+
+    plt.grid(True)
+    plt.show()
 
 
 # Example usage:
@@ -154,7 +178,7 @@ def apply_and_visualize(original_data, augmented_data, title):
 # Use to be sure there has been a difference (if not visible enough)
 DEBUG = 0
 # Show plots
-VISUEL = 1
+VISUEL = 0
 """
 To use the program properly set at least 1 of the two macros to '1'
 - data_separate allows to generate each type of augmentation from the original 
@@ -180,7 +204,9 @@ eg. data_seperate = 1   ====>   saving_data_seperate = 1
 
 ** data_compile **
 - saving_data_compile
-        save the 
+        save the data augmentation in 1 file
+- saving_data_compile_dataset
+        save the data augmentation and the dataset in the same file
 """
 SAVING_DATA_SEPARATE = 1
 SAVING_DATA_SEPARATE_CONCAT = 1
@@ -189,66 +215,84 @@ SAVING_DATA_SEPARATE_CONCAT_DATASET = 1
 SAVING_DATA_COMPILE = 1
 SAVING_DATA_COMPILE_DATASET = 1
 
-
 csv_path = "datasets/dataset_v3.csv"
+# csv_path = "input/Balancier_04.csv"
+# csv_path = 'output/balancier_1_5k_15k.csv'
+
 original_data = load_data(csv_path)
 
-# Saving datasets
 directory, file = os.path.split(csv_path)
 filename, ext = os.path.splitext(file)
 dir_path = os.path.join(directory, filename)
-os.makedirs(dir_path, exist_ok=True)
+
+# Saving datasets
+if (SAVING_DATA_SEPARATE or SAVING_DATA_SEPARATE_CONCAT or SAVING_DATA_SEPARATE_CONCAT_DATASET
+        or SAVING_DATA_COMPILE or SAVING_DATA_COMPILE_DATASET):
+    os.makedirs(dir_path, exist_ok=True)
 
 rotated_data = pd.DataFrame()
 scaled_data = pd.DataFrame()
-subsampled_data = pd.DataFrame()
+# subsampled_data = pd.DataFrame()
 jittered_data = pd.DataFrame()
 noisy_data = pd.DataFrame()
 enhanced_data = pd.DataFrame()
 
 # Apply augmentation functions and visualize after each
 if DATA_SEPARATE:
-    rotated_data = apply_and_visualize(original_data, apply_random_rotation, "Rotated data")
-    scaled_data = apply_and_visualize(original_data, apply_magnitude_scaling, "Scaling data")
-    subsampled_data = apply_and_visualize(original_data, apply_temporal_subsampling, "Subsampling data")
-    jittered_data = apply_and_visualize(original_data, apply_jittering, "Jittered data")
-    noisy_data = apply_and_visualize(original_data, apply_gaussian_noise, "Gaussian noise data")
-    enhanced_data = apply_and_visualize(original_data, apply_laplace, "Laplace data")
-
-    # Saving 1 by one
-    if SAVING_DATA_SEPARATE:
-        rotated_data.to_csv(dir_path + '/rotated_data' + '.csv', index=False, header=True)
-        scaled_data.to_csv(dir_path + '/scaled_data' + '.csv', index=False, header=True)
-        subsampled_data.to_csv(dir_path + '/subsampled_data' + '.csv', index=False, header=True)
-        jittered_data.to_csv(dir_path + '/jittered_data' + '.csv', index=False, header=True)
-        noisy_data.to_csv(dir_path + '/noisy_data' + '.csv', index=False, header=True)
-        enhanced_data.to_csv(dir_path + '/enhanced_data' + '.csv', index=False, header=True)
+    # rotated_data = apply_and_visualize(original_data, apply_random_rotation, "Rotated data", dir_path)
+    scaled_data = apply_and_visualize(original_data, apply_magnitude_scaling, "Scaling data", dir_path)
+    # subsampled_data = apply_and_visualize(original_data, apply_temporal_subsampling, "Subsampling data", dir_path)
+    jittered_data = apply_and_visualize(original_data, apply_jittering, "Jittered data", dir_path)
+    noisy_data = apply_and_visualize(original_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
+    enhanced_data = apply_and_visualize(original_data, apply_laplace, "Laplace data", dir_path)
 
     # Concat them
     if SAVING_DATA_SEPARATE_CONCAT:
-        concat_data = pd.concat([rotated_data, scaled_data, subsampled_data, jittered_data, noisy_data, enhanced_data])
-        concat_data.to_csv(dir_path + '/concat_data' + '.csv', index=False, header=True)
+        concat_data = pd.concat(
+            [scaled_data, jittered_data, noisy_data, enhanced_data])
+        if concat_data.shape[0] % 100:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        else:
+            concat_data.to_csv(dir_path + '/concat_data' + '.csv', index=False, header=True)
 
     # Concat them with original data
     if SAVING_DATA_SEPARATE_CONCAT_DATASET:
-        concat_data = pd.concat([original_data, rotated_data, scaled_data, subsampled_data, jittered_data, noisy_data, enhanced_data])
-        concat_data.to_csv(dir_path + '/concat_data_+_dataset' + '.csv', index=False, header=True)
+        concat_data = pd.concat(
+            [original_data, scaled_data, jittered_data, noisy_data, enhanced_data])
+        if concat_data.shape[0] % 100:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        else:
+            concat_data.to_csv(dir_path + '/concat_data_+_dataset' + '.csv', index=False, header=True)
 
 # Add every augmentation layer over the previous one
 # /!\ if not set properly could result in unusable data /!\
 if DATA_COMPILE:
-    scaled_data = apply_and_visualize(rotated_data, apply_magnitude_scaling, "Scaling data")
-    subsampled_data = apply_and_visualize(scaled_data, apply_temporal_subsampling, "Subsampling data")
-    jittered_data = apply_and_visualize(subsampled_data, apply_jittering, "Jittered data")
-    noisy_data = apply_and_visualize(jittered_data, apply_gaussian_noise, "Gaussian noise data")
-    enhanced_data = apply_and_visualize(noisy_data, apply_laplace, "Laplace data")
+    # rotated_data = apply_and_visualize(original_data, apply_random_rotation, "Rotated data", dir_path)
+    # subsampled_data = apply_and_visualize(scaled_data, apply_temporal_subsampling, "Subsampling data", dir_path)
+    scaled_data = apply_and_visualize(original_data, apply_magnitude_scaling, "Scaling data", dir_path)
+    jittered_data = apply_and_visualize(scaled_data, apply_jittering, "Jittered data", dir_path)
+    noisy_data = apply_and_visualize(jittered_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
+    enhanced_data = apply_and_visualize(noisy_data, apply_laplace, "Laplace data", dir_path)
+    visualize_data(original_data, enhanced_data, 'Compiled data')
 
     if SAVING_DATA_COMPILE:
-        enhanced_data.to_csv(dir_path + '/compile_data' + '.csv', index=False, header=True)
+        if enhanced_data.shape[0] % 100:
+            print(f"File has {enhanced_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        else:
+            enhanced_data.to_csv(dir_path + '/compile_data' + '.csv', index=False, header=True)
 
     if SAVING_DATA_COMPILE_DATASET:
         concat_data = pd.concat([original_data, enhanced_data])
-        concat_data.to_csv(dir_path + '/compile_data_+_dataset' + '.csv', index=False, header=True)
+        if concat_data.shape[0] % 100:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        else:
+            saved_path = dir_path + '/compile_data_+_dataset' + '.csv'
+            concat_data.to_csv(saved_path, index=False, header=True)
+
+            # Verify saved file
+            saved_csv = pd.read_csv(saved_path)
+            if 'State' in saved_csv.columns:
+                print_dataset(saved_csv, 'After saving the file')
 
 # For bandpass filtering, you'll need to implement or use a specific library.
 
