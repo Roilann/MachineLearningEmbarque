@@ -2,8 +2,8 @@ import os
 import pathlib
 import time
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from keras.src.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.src.regularizers import l2
@@ -26,13 +26,15 @@ np.random.seed(seed)
 tf.random.set_seed(seed)
 
 files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data.csv")]
 files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset.csv")]
 files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset.csv")]
 
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
 
-entry = input("Enter the id of the file you want to test or 'exit' to exit:")
+entry = input("Enter the id of the file you want to test or 'exit' to exit: ")
 
 file_selected = files_path[int(entry)]
 
@@ -44,7 +46,8 @@ Y_raw_dataset = raw_dataset[:, -1]
 
 # Vérification si la longueur de raw_dataset est un multiple de 200
 if len(raw_dataset) % DATA_POINTS != 0:
-    raise ValueError(f"Le nombre de lignes dans le fichier CSV n'est pas un multiple de {DATA_POINTS}.")
+    error_message = f"Le nombre de lignes dans le fichier CSV n'est pas un multiple de {DATA_POINTS}."
+    raise ValueError(error_message)
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 E_raw_dataset = scaler.fit_transform(E_raw_dataset)
@@ -68,7 +71,6 @@ Y_dataset = np.asarray(Y_dataset)
 E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset, test_size=0.2,
                                                                                     random_state=seed)
 l2_regularizer = l2(0.01)
-# l2_regularizer = None
 
 # L'ajout de EarlyStopping dans l'optique d'arrêter un mauvais apprentissage et donc de gagner du temps
 early_stopping = EarlyStopping(
@@ -99,25 +101,18 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
-adam_optimizer = tf.keras.optimizers.Adam(learning_rate=0.5)
-sgd_optimizer = tf.keras.optimizers.SGD(learning_rate=0.5, momentum=0.2, weight_decay=0.0)
 rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
 
 metrics_accuracy = ['accuracy']
-# non pertinent pour le moment
-metrics_binary_accuracy = [tf.keras.metrics.BinaryAccuracy()]
-metrics_auc = [tf.keras.metrics.AUC()]
-# non pertinent pour le moment
 metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
-# Des pics étaient observés avec metrics_auc et dataset_v1, donc nous avons essayer precision et recall mais résultats
-# plus mauvais. Nous n'avons pas encore essayé de modifié les paramètres de ces fonction
 metric_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+metrics_accuracy_precision_recall = ['accuracy',
+                                     tf.keras.metrics.Precision(),
+                                     tf.keras.metrics.Recall()]
 
 model.compile(optimizer=rms_optimizer,
               loss='binary_crossentropy',
-              metrics=metric_precision_recall)
-
-# model.summary()
+              metrics=metrics_accuracy_precision_recall)
 
 history = model.fit(E_train_dataset,
                     Y_train_dataset,
@@ -127,15 +122,22 @@ history = model.fit(E_train_dataset,
                     validation_split=0.2,
                     callbacks=[early_stopping, reduce_lr])
 
-# evaluate the model
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
 print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
-# plot figure
 plt.figure()
-plt.plot(history.history['recall'])
-plt.plot(history.history['val_recall'])
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Val'], loc='upper left')
+plt.show()
+
+plt.figure()
+plt.plot(history.history['recall_1'])
+plt.plot(history.history['val_recall_1'])
 plt.title('Model recall')
 plt.ylabel('Recall')
 plt.xlabel('Epoch')
@@ -143,8 +145,8 @@ plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
 
 plt.figure()
-plt.plot(history.history['precision'])
-plt.plot(history.history['val_precision'])
+plt.plot(history.history['precision_1'])
+plt.plot(history.history['val_precision_1'])
 plt.title('Model precision')
 plt.ylabel('Precision')
 plt.xlabel('Epoch')
@@ -159,7 +161,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
-# Plot training & validation loss values
 
 # save the model
 model_name = input("Do you want to save the model? (File name/n) ")
@@ -170,6 +171,15 @@ if model_name != "n" and model_name != "":
     model_structure = model.to_json()
     with open('models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
+
+    # plt.figure()
+    # plt.plot(history.history['accuracy'])
+    # plt.plot(history.history['val_accuracy'])
+    # plt.title('Model accuracy')
+    # plt.ylabel('Accuracy')
+    # plt.xlabel('Epoch')
+    # plt.legend(['Train', 'Val'], loc='upper left')
+    # plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
     plt.plot(history.history['recall'])

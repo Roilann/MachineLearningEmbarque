@@ -44,6 +44,7 @@ while True:
         'global_non_pendulum': 0,
         'global_pendulum': 0,
         'result_per_dataset': [],
+        'raw_result_per_dataset': [],
     })
 
 headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
@@ -116,9 +117,13 @@ while True:
                 results[model_index]['global_non_pendulum'] = results[model_index]['global_non_pendulum'] + 1
 
             result_per_dataset = np.full(100, result_per_dataset).tolist()
+            raw_result_per_dataset = np.full(100, result[0][0]).tolist()
 
             results[model_index]['result_per_dataset'] = np.concatenate((results[model_index]['result_per_dataset'],
                                                                          result_per_dataset), axis=0)
+
+            results[model_index]['raw_result_per_dataset'] = np.concatenate((results[model_index]['raw_result_per_dataset'],
+                                                                             raw_result_per_dataset), axis=0)
 
     print()
 
@@ -189,7 +194,7 @@ while True:
 
     plt.figure(figsize=(10, 6))
 
-    plt.subplot(3, 1, 1)
+    plt.subplot(4, 1, 1)
     plt.plot(csv_data['AccX [mg]'], label='AccX as a function of T')
     plt.plot(csv_data['AccY [mg]'], label='AccY as a function of T')
     plt.plot(csv_data['AccZ [mg]'], label='AccZ as a function of T')
@@ -197,14 +202,21 @@ while True:
     plt.legend()
     plt.title('Models result')
 
-    plt.subplot(3, 1, 2)
+    plt.subplot(4, 1, 2)
     for model_index in range(len(models)):
         plt.plot(np.array(results[model_index]['result_per_dataset']), label=f"Model {results[model_index]['id']}")
         results[model_index]['result_per_dataset'] = []
     plt.ylabel('Result')
     plt.legend()
 
-    plt.subplot(3, 1, 3)
+    plt.subplot(4, 1, 3)
+    for model_index in range(len(models)):
+        plt.plot(np.array(results[model_index]['raw_result_per_dataset']), label=f"Model {results[model_index]['id']}")
+        results[model_index]['raw_result_per_dataset'] = []
+    plt.ylabel('Raw result')
+    plt.legend()
+
+    plt.subplot(4, 1, 4)
     plt.plot(csv_data['State'], label="Expected results")
     plt.xlabel('Point number')
     plt.ylabel('Result')
@@ -213,4 +225,3 @@ while True:
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-
