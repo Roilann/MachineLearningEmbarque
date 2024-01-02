@@ -11,9 +11,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-# Minimum amount of points to determine if the movement is swinging or not
-DATA_POINTS = 100
-
+from utils import DATA_POINTS
 
 def scale_sequences(sequences):
     scaler = MinMaxScaler(feature_range=(0, 1))

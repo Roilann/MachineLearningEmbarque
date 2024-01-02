@@ -1,5 +1,8 @@
 from matplotlib import pyplot as plt
 
+# Minimum amount of points to determine if the movement is swinging or not
+DATA_POINTS = 100
+
 
 def print_dataset(dataset, title: str = 'Dataset state'):
     plt.figure(figsize=(10, 6))

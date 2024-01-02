@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.ndimage import gaussian_filter1d
 from scipy.ndimage import laplace
 
-from utils import print_dataset
+from utils import print_dataset, DATA_POINTS
 
 
 # Load your original accelerometer data from CSV
@@ -143,8 +143,8 @@ def apply_and_visualize(original_data, augmented_data, title, save_path):
     if DEBUG:
         compare_data(original_data, returned_data)
     if SAVING_DATA_SEPARATE:
-        if returned_data.shape[0] % 100:
-            print(f"File has {returned_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        if returned_data.shape[0] % DATA_POINTS:
+            print(f"File has {returned_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
             returned_data.to_csv(save_path + f'/{title}' + '.csv', index=False, header=True)
     return returned_data
@@ -225,8 +225,8 @@ if DATA_SEPARATE:
     if SAVING_DATA_SEPARATE_CONCAT:
         concat_data = pd.concat(
             [scaled_data, jittered_data, noisy_data, enhanced_data])
-        if concat_data.shape[0] % 100:
-            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        if concat_data.shape[0] % DATA_POINTS:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
             concat_data.to_csv(dir_path + '/concat_data' + '.csv', index=False, header=True)
 
@@ -234,8 +234,8 @@ if DATA_SEPARATE:
     if SAVING_DATA_SEPARATE_CONCAT_DATASET:
         concat_data = pd.concat(
             [original_data, scaled_data, jittered_data, noisy_data, enhanced_data])
-        if concat_data.shape[0] % 100:
-            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        if concat_data.shape[0] % DATA_POINTS:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
             concat_data.to_csv(dir_path + '/concat_data_+_dataset' + '.csv', index=False, header=True)
 
@@ -251,15 +251,15 @@ if DATA_COMPILE:
     visualize_data(original_data, enhanced_data, 'Compiled data')
 
     if SAVING_DATA_COMPILE:
-        if enhanced_data.shape[0] % 100:
-            print(f"File has {enhanced_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        if enhanced_data.shape[0] % DATA_POINTS:
+            print(f"File has {enhanced_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
             enhanced_data.to_csv(dir_path + '/compile_data' + '.csv', index=False, header=True)
 
     if SAVING_DATA_COMPILE_DATASET:
         concat_data = pd.concat([original_data, enhanced_data])
-        if concat_data.shape[0] % 100:
-            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+        if concat_data.shape[0] % DATA_POINTS:
+            print(f"File has {concat_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
             saved_path = dir_path + '/compile_data_+_dataset' + '.csv'
             concat_data.to_csv(saved_path, index=False, header=True)

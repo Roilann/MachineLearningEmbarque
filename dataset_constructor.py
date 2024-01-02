@@ -2,7 +2,7 @@ import pathlib
 
 import pandas as pd
 
-from utils import print_dataset
+from utils import print_dataset, DATA_POINTS
 
 
 def strike(text):
@@ -28,8 +28,8 @@ while True:
     file_selected = files_path[int(entry)]
 
     data = pd.read_csv(file_selected, usecols=headers)
-    if data.shape[0] % 100:
-        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of 100, so it will be ignored")
+    if data.shape[0] % DATA_POINTS:
+        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         continue
     else:
         print(f"File selected: {file_selected.name}")
