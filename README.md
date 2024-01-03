@@ -24,7 +24,7 @@ et lecture de documentations. Nous avons fait ce travail avec un premier dataset
 
 Actuellement nous avons pu créer deux nouveaux datasets, nous n'avons pas encore eu le temps de les exploiter 
 suffisamment. En parallèle nous avons essayé d'identifier les problèmes des précédents modèles et nous avons ajouté dans le
-fichier model.py plusieurs algorithmes pour les metrics, les callbacks ou encore les regularizers.
+fichier `model.py` plusieurs algorithmes pour les metrics, les callbacks ou encore les regularizers.
 Cependant nous n'avons pas encore eut le temps de réellement de les intégrer dans le modèle, de les essayer et de les configurer. 
 Nous avons tout de même exporté le modèle dans cet état dans le cas où cela pourrait vous intéressez, le modèle 
 s'appelle dataset_v3_rms_001_bc_e200_b20_vp02_EXPERIMENTAL_metrics_precision_recall_early_stopping_reduce_lr_on_plateau.
@@ -36,7 +36,7 @@ s'appelle dataset_v3_rms_001_bc_e200_b20_vp02_EXPERIMENTAL_metrics_precision_rec
  - Lancer le programme `visualize_and_export.py`
     - Écrire le nom du fichier csv voulu
     - Une fois les courbes fermées, entrer la valeur minimale à prendre en compte puis la valeur maximale à prendre en compte 
-        - /!\ Le nombre de ligne indiqué doit être un multiple du nombre de point minimal qui sera analysé /!\
+        - /!\ Le nombre de ligne indiqué doit être un multiple du nombre de point minimal qui sera analysé /!\ => voir `utils.py`
         - Ne pas hésiter à modifier les valeurs jusqu'à avoir la section voulue
     - Quand la section est sélectionnée, écrire `exit`
     - Préciser au programme si l'analyse est un balancier `1` ou non `0`
