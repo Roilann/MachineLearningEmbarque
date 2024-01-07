@@ -155,7 +155,7 @@ def apply_and_visualize(original_data, augmented_data, title, save_path):
 # Use to be sure there has been a difference (if not visible enough)
 DEBUG = 0
 # Show plots
-VISUEL = 0
+VISUEL = 1
 """
 To use the program properly set at least 1 of the two macros to '1'
 - data_separate allows to generate each type of augmentation from the original 
@@ -192,7 +192,7 @@ SAVING_DATA_SEPARATE_CONCAT_DATASET = 1
 SAVING_DATA_COMPILE = 1
 SAVING_DATA_COMPILE_DATASET = 1
 
-csv_path = "datasets/dataset_v3.csv"
+csv_path = "datasets/dataset_v4.csv"
 
 original_data = load_data(csv_path)
 
