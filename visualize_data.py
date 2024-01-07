@@ -21,8 +21,11 @@ def verify_folder_input(user_input_folder):
     elif user_input_folder == 'dataset_v3' or user_input_folder == 'data_v3' or user_input_folder == 'd3':
         output = "datasets/dataset_v3"
         folder_authorized = True
-    elif user_input_folder == 'v':
-        output = "model_valid"
+    elif user_input_folder == 'dataset_v4' or user_input_folder == 'data_v4' or user_input_folder == 'd4':
+        output = "datasets/dataset_v4"
+        folder_authorized = True
+    elif user_input_folder == 't':
+        output = "model_test"
         folder_authorized = True
 
     return folder_authorized, output
