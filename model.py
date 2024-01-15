@@ -13,6 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from utils import DATA_POINTS
 
+
 def scale_sequences(sequences):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaler.fit_transform(sequences)
@@ -49,6 +50,7 @@ if len(raw_dataset) % DATA_POINTS != 0:
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 E_raw_dataset = scaler.fit_transform(E_raw_dataset)
+print(f"Dataset scaled with MinMaxScaler: {scaler.data_min_} - {scaler.data_max_}")
 
 # Division du dataset en sous-tableaux
 E_dataset = np.array_split(E_raw_dataset, len(raw_dataset) // DATA_POINTS)
@@ -103,14 +105,14 @@ rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
 
 metrics_accuracy = ['accuracy']
 metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
-metric_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+metrics_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
 metrics_accuracy_precision_recall = ['accuracy',
                                      tf.keras.metrics.Precision(),
                                      tf.keras.metrics.Recall()]
 
 model.compile(optimizer=rms_optimizer,
               loss='binary_crossentropy',
-              metrics=metrics_accuracy_precision_recall)
+              metrics=metrics_precision_recall)
 
 history = model.fit(E_train_dataset,
                     Y_train_dataset,
@@ -125,17 +127,8 @@ print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
 plt.figure()
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('Model accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Val'], loc='upper left')
-plt.show()
-
-plt.figure()
-plt.plot(history.history['recall_1'])
-plt.plot(history.history['val_recall_1'])
+plt.plot(history.history['recall'])
+plt.plot(history.history['val_recall'])
 plt.title('Model recall')
 plt.ylabel('Recall')
 plt.xlabel('Epoch')
@@ -143,8 +136,8 @@ plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
 
 plt.figure()
-plt.plot(history.history['precision_1'])
-plt.plot(history.history['val_precision_1'])
+plt.plot(history.history['precision'])
+plt.plot(history.history['val_precision'])
 plt.title('Model precision')
 plt.ylabel('Precision')
 plt.xlabel('Epoch')
@@ -169,15 +162,6 @@ if model_name != "n" and model_name != "":
     model_structure = model.to_json()
     with open('models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
-
-    # plt.figure()
-    # plt.plot(history.history['accuracy'])
-    # plt.plot(history.history['val_accuracy'])
-    # plt.title('Model accuracy')
-    # plt.ylabel('Accuracy')
-    # plt.xlabel('Epoch')
-    # plt.legend(['Train', 'Val'], loc='upper left')
-    # plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
     plt.plot(history.history['recall'])
