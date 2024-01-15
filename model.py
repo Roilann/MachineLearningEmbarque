@@ -103,6 +103,7 @@ if len(raw_dataset) % DATA_POINTS != 0:
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 E_raw_dataset = scaler.fit_transform(E_raw_dataset)
+print(f"Dataset scaled with MinMaxScaler: {scaler.data_min_} - {scaler.data_max_}")
 
 # Division du dataset en sous-tableaux
 E_dataset = np.array_split(E_raw_dataset, len(raw_dataset) // DATA_POINTS)
