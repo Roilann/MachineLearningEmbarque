@@ -6,7 +6,7 @@ FILTRE = 0
 
 if __name__ == '__main__':
     # Lire les données à partir du fichier CSV
-    donnees = pd.read_csv('input/SansBalancier.csv')
+    donnees = pd.read_csv('../input/SansBalancier.csv')
     # donnees = donnees[(donnees['T [ms]'] >= 12500) & (donnees['T [ms]'] <= 27500)]
     # donnees.reset_index(drop=True, inplace=True)
 
@@ -26,7 +26,6 @@ if __name__ == '__main__':
         # Appliquer le filtre aux données
         donnees_acc_y_filtrees = filtfilt(b, a, donnees['AccY [mg]'])
 
-
     # Créer un graphique
     plt.figure(figsize=(10, 6))
     plt.plot(donnees['T [ms]'], donnees['AccX [mg]'], label='AccX en fonction de T')
@@ -40,7 +39,6 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid(True)
     plt.show()
-
 
     plt.figure(figsize=(10, 6))
 

@@ -9,23 +9,23 @@ def verify_folder_input(user_input_folder):
     folder_authorized = False
     output = None
     if user_input_folder == 'input' or user_input_folder == 'in' or user_input_folder == 'i':
-        output = "input"
+        output = "../input"
         folder_authorized = True
     elif user_input_folder == 'output' or user_input_folder == 'out' or user_input_folder == 'o':
-        output = "output"
+        output = "../output"
         folder_authorized = True
     elif (user_input_folder == 'dataset' or user_input_folder == 'data'
           or user_input_folder == 'datasets' or user_input_folder == 'd'):
-        output = "datasets"
+        output = "../datasets"
         folder_authorized = True
     elif user_input_folder == 'dataset_v3' or user_input_folder == 'data_v3' or user_input_folder == 'd3':
-        output = "datasets/dataset_v3"
+        output = "../datasets/dataset_v3"
         folder_authorized = True
     elif user_input_folder == 'dataset_v4' or user_input_folder == 'data_v4' or user_input_folder == 'd4':
-        output = "datasets/dataset_v4"
+        output = "../datasets/dataset_v4"
         folder_authorized = True
     elif user_input_folder == 't':
-        output = "model_test"
+        output = "../model_test"
         folder_authorized = True
 
     return folder_authorized, output

@@ -1,7 +1,6 @@
 import pathlib
-
 import pandas as pd
-
+import os
 from utils import print_dataset, DATA_POINTS
 
 
@@ -12,7 +11,13 @@ def strike(text):
     return result
 
 
-files_path = [f for f in pathlib.Path().glob("./output/*.csv")]
+# Navigate to the parent directory
+parent_directory = os.path.dirname(os.getcwd())
+# Construct the path to the output folder in the parent directory
+output_folder_path = os.path.join(parent_directory, "output")
+
+# Use pathlib to find CSV files in the output folder
+files_path = [f for f in pathlib.Path(output_folder_path).glob("*.csv")]
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
 
@@ -29,7 +34,8 @@ while True:
 
     data = pd.read_csv(file_selected, usecols=headers)
     if data.shape[0] % DATA_POINTS:
-        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
+        print(f"File {file_selected} has {data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will "
+              f"be ignored")
         continue
     else:
         print(f"File selected: {file_selected.name}")
@@ -42,4 +48,4 @@ while True:
 print_dataset(dataset)
 
 dataset_name = input("Enter the name of the dataset to export: ")
-dataset.to_csv(f'datasets/{dataset_name}.csv', index=False, header=True)
+dataset.to_csv(f'../datasets/{dataset_name}.csv', index=False, header=True)

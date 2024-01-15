@@ -8,7 +8,7 @@ t_max = 0
 
 # Read the specified file
 file_name = input("Enter the file name: ")
-data = pd.read_csv('input/' + file_name + '.csv')
+data = pd.read_csv('../input/' + file_name + '.csv')
 
 plt.figure(figsize=(10, 6))
 plt.plot(data['T [ms]'], data['AccX [mg]'], label='AccX as a function of T')
@@ -66,6 +66,6 @@ accept_name = input(f"Do you accept the file name {saved_filename} (y/n)")
 if accept_name != 'y':
     saved_filename = input("Enter the name of the CSV file for export: ")
 
-data_to_export.to_csv('output/' + saved_filename + '.csv', index=False, header=True)
+data_to_export.to_csv('../output/' + saved_filename + '.csv', index=False, header=True)
 
 print(f"Data exported to file '{saved_filename}'.")

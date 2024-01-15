@@ -7,8 +7,15 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
-h5_files_path = [f for f in pathlib.Path().glob("./models/*/*.h5")]
-json_files_path = [f for f in pathlib.Path().glob("./models/*/*.json")]
+
+# Navigate to the parent directory
+parent_directory = os.path.dirname(os.getcwd())
+# Construct the path to the output folder in the parent directory
+model_folder_path = os.path.join(parent_directory, "models")
+
+
+h5_files_path = [f for f in pathlib.Path(model_folder_path).glob("*/*.h5")]
+json_files_path = [f for f in pathlib.Path(model_folder_path).glob("*/*.json")]
 
 models_to_load = []
 
@@ -49,9 +56,15 @@ while True:
 
 headers = ["AccX [mg]", "AccY [mg]", "AccZ [mg]", "State"]
 
-files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset.csv")]
+# Navigate to the parent directory
+parent_directory = os.path.dirname(os.getcwd())
+# Construct the path to the output folder in the parent directory
+dataset_folder_path = os.path.join(parent_directory, "datasets")
+
+
+files_path = [f for f in pathlib.Path(dataset_folder_path).glob("*.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/concat_data_+_dataset.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/compile_data_+_dataset.csv")]
 
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")

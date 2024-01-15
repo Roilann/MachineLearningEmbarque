@@ -76,11 +76,16 @@ seed = int(time.time())
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
-files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset*.csv")]
+# Navigate to the parent directory
+parent_directory = os.path.dirname(os.getcwd())
+# Construct the path to the output folder in the parent directory
+dataset_folder_path = os.path.join(parent_directory, "datasets")
+
+files_path = [f for f in pathlib.Path(dataset_folder_path).glob("*.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/concat_data*.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/compile_data*.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/concat_data_+_dataset*.csv")]
+files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/compile_data_+_dataset*.csv")]
 
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
@@ -218,11 +223,11 @@ plt.show()
 # save the model
 model_name = input("Do you want to save the model? (File name/n) ")
 if model_name != "n" and model_name != "":
-    os.makedirs('models/' + model_name, exist_ok=True)
-    model.save('models/' + model_name + '/' + model_name + '.h5')
+    os.makedirs('../models/' + model_name, exist_ok=True)
+    model.save('../models/' + model_name + '/' + model_name + '.h5')
 
     model_structure = model.to_json()
-    with open('models/' + model_name + '/' + model_name + '.json', "w") as json_file:
+    with open('../models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
 
     # plt.figure()
@@ -232,7 +237,7 @@ if model_name != "n" and model_name != "":
     # plt.ylabel('Accuracy')
     # plt.xlabel('Epoch')
     # plt.legend(['Train', 'Val'], loc='upper left')
-    # plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
+    # plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
     plt.plot(history.history['recall_1'])
@@ -241,7 +246,7 @@ if model_name != "n" and model_name != "":
     plt.ylabel('Recall')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
+    plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
     plt.plot(history.history['precision_1'])
@@ -250,7 +255,7 @@ if model_name != "n" and model_name != "":
     plt.ylabel('Precision')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('models/' + model_name + '/' + model_name + '_precision_plot.png')
+    plt.savefig('../models/' + model_name + '/' + model_name + '_precision_plot.png')
 
     plt.figure()
     plt.plot(history.history['loss'])
@@ -259,6 +264,6 @@ if model_name != "n" and model_name != "":
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('models/' + model_name + '/' + model_name + '_loss_plot.png')
+    plt.savefig('../models/' + model_name + '/' + model_name + '_loss_plot.png')
 
     print("Model saved.")

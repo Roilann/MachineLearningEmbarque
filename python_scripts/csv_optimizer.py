@@ -43,5 +43,5 @@ def process_folder(input_folder):
 
 
 # Example usage:
-input_folder_path = 'datasets/dataset_v4'
+input_folder_path = '../datasets/dataset_v4'
 process_folder(input_folder_path)
