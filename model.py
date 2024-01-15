@@ -11,7 +11,60 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-from utils import DATA_POINTS
+from utils import DATA_POINTS, print_dataset
+
+# Settings to modify in the AI
+
+# Split parameters
+TEST_SPLIT = 0.2
+VAL_SPLIT = 0.2
+
+# Optimizers
+rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
+
+OPTIMIZER = rms_optimizer
+
+# Loss
+
+sparse_loss = tf.keras.losses.SparseCategoricalCrossentropy()
+
+LOSS = sparse_loss
+
+# Metrics
+metrics_accuracy = ['accuracy']
+metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
+metrics_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+metrics_accuracy_precision_recall = ['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+
+METRICS = metrics_accuracy_precision_recall
+
+# Main parameters
+EPOCHS = 200
+BATCH_SIZE = 60
+
+
+def visualize_error(error_lot, data):
+    # Ensure data is a 2D NumPy array
+    if not isinstance(data, np.ndarray) or data.ndim != 2:
+        raise ValueError("Data must be a 2D NumPy array.")
+
+    previous_lot = (error_lot - 1) * 100
+    next_lot = (error_lot + 2) * 100
+
+    # Check if previous_lot and next_lot + 1 are within the bounds of data
+    if previous_lot < 0 or next_lot + 1 > data.shape[0]:
+        raise ValueError("Indices out of bounds for the given data.")
+
+    # Confirm that dataset in print_dataset has the required columns
+    required_columns = ['AccX [mg]', 'AccY [mg]', 'AccZ [mg]']
+    missing_columns = [col for col in required_columns if col not in headers]
+
+    if missing_columns:
+        raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
+
+    selected_lot = data[previous_lot:next_lot + 1, :]
+    print_dataset(selected_lot, f"Error for bloc {previous_lot} to {next_lot}")
+
 
 def scale_sequences(sequences):
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -24,10 +77,10 @@ np.random.seed(seed)
 tf.random.set_seed(seed)
 
 files_path = [f for f in pathlib.Path().glob("./datasets/*.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset.csv")]
-files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/concat_data_+_dataset*.csv")]
+files_path = files_path + [f for f in pathlib.Path().glob("./datasets/*/compile_data_+_dataset*.csv")]
 
 for index, file_path in enumerate(files_path):
     print(f"{index} - {file_path}")
@@ -44,6 +97,7 @@ Y_raw_dataset = raw_dataset[:, -1]
 
 # Vérification si la longueur de raw_dataset est un multiple de 200
 if len(raw_dataset) % DATA_POINTS != 0:
+    print(f'Nb lignes : {len(raw_dataset)}')
     error_message = f"Le nombre de lignes dans le fichier CSV n'est pas un multiple de {DATA_POINTS}."
     raise ValueError(error_message)
 
@@ -54,10 +108,17 @@ E_raw_dataset = scaler.fit_transform(E_raw_dataset)
 E_dataset = np.array_split(E_raw_dataset, len(raw_dataset) // DATA_POINTS)
 Y_dataset = np.array_split(Y_raw_dataset, len(raw_dataset) // DATA_POINTS)
 
+# Initialize a variable to store the lot number
+error_lot_number = None
+
 # Vérifier que toutes les étiquettes sont identiques dans chaque lot
-for lot in Y_dataset:
+for i, lot in enumerate(Y_dataset):
     if np.any(lot != lot[0]):
-        raise ValueError("Toutes les étiquettes ne sont pas identiques dans un lot de 100.")
+        error_lot_number = i
+        print(f'Voir lot : {lot}')
+        visualize_error(error_lot_number, raw_dataset)
+        raise ValueError(f"Toutes les étiquettes ne sont pas identiques dans un lot {error_lot_number}"
+                         + f" de {DATA_POINTS}.")
 
 # Réduire chaque lot à une seule étiquette
 Y_dataset = [lot[0] for lot in Y_dataset]
@@ -66,7 +127,8 @@ Y_dataset = [lot[0] for lot in Y_dataset]
 E_dataset = np.asarray(E_dataset)
 Y_dataset = np.asarray(Y_dataset)
 
-E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset, test_size=0.2,
+E_train_dataset, E_test_dataset, Y_train_dataset, Y_test_dataset = train_test_split(E_dataset, Y_dataset,
+                                                                                    test_size=TEST_SPLIT,
                                                                                     random_state=seed)
 l2_regularizer = l2(0.01)
 
@@ -90,7 +152,8 @@ reduce_lr = ReduceLROnPlateau(
 )
 
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(DATA_POINTS, activation='relu', input_shape=(E_train_dataset.shape[1], E_train_dataset.shape[2])),
+    tf.keras.layers.Dense(DATA_POINTS, activation='relu',
+                          input_shape=(E_train_dataset.shape[1], E_train_dataset.shape[2])),
     tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Dense(50, activation='relu', kernel_regularizer=l2_regularizer),
     tf.keras.layers.Dropout(0.2),
@@ -99,24 +162,15 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
-rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
-
-metrics_accuracy = ['accuracy']
-metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metrics.AUC()]
-metric_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
-metrics_accuracy_precision_recall = ['accuracy',
-                                     tf.keras.metrics.Precision(),
-                                     tf.keras.metrics.Recall()]
-
-model.compile(optimizer=rms_optimizer,
+model.compile(optimizer=OPTIMIZER,
               loss='binary_crossentropy',
-              metrics=metrics_accuracy_precision_recall)
+              metrics=METRICS)
 
 history = model.fit(E_train_dataset,
                     Y_train_dataset,
                     shuffle=False,
-                    epochs=200,
-                    batch_size=20,
+                    epochs=EPOCHS,
+                    batch_size=BATCH_SIZE,
                     validation_split=0.2,
                     callbacks=[early_stopping, reduce_lr])
 
@@ -180,8 +234,8 @@ if model_name != "n" and model_name != "":
     # plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
-    plt.plot(history.history['recall'])
-    plt.plot(history.history['val_recall'])
+    plt.plot(history.history['recall_1'])
+    plt.plot(history.history['val_recall_1'])
     plt.title('Model recall')
     plt.ylabel('Recall')
     plt.xlabel('Epoch')
@@ -189,8 +243,8 @@ if model_name != "n" and model_name != "":
     plt.savefig('models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
-    plt.plot(history.history['precision'])
-    plt.plot(history.history['val_precision'])
+    plt.plot(history.history['precision_1'])
+    plt.plot(history.history['val_precision_1'])
     plt.title('Model precision')
     plt.ylabel('Precision')
     plt.xlabel('Epoch')

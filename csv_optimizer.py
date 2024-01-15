@@ -38,6 +38,8 @@ def process_folder(input_folder):
             input_file_path = os.path.join(input_folder, filename)
             output_file_path = os.path.join(input_folder, filename.replace('.csv', '_optimized.csv'))
             process_csv(input_file_path, output_file_path)
+            # Remove the old CSV file
+            os.remove(input_file_path)
 
 
 # Example usage:

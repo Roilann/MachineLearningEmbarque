@@ -155,7 +155,7 @@ def apply_and_visualize(original_data, augmented_data, title, save_path):
 # Use to be sure there has been a difference (if not visible enough)
 DEBUG = 0
 # Show plots
-VISUEL = 1
+VISUEL = 0
 """
 To use the program properly set at least 1 of the two macros to '1'
 - data_separate allows to generate each type of augmentation from the original 
@@ -205,11 +205,11 @@ if (SAVING_DATA_SEPARATE or SAVING_DATA_SEPARATE_CONCAT or SAVING_DATA_SEPARATE_
         or SAVING_DATA_COMPILE or SAVING_DATA_COMPILE_DATASET):
     os.makedirs(dir_path, exist_ok=True)
 
-rotated_data = pd.DataFrame()
+# rotated_data = pd.DataFrame()
 scaled_data = pd.DataFrame()
 # subsampled_data = pd.DataFrame()
 jittered_data = pd.DataFrame()
-noisy_data = pd.DataFrame()
+# noisy_data = pd.DataFrame()
 enhanced_data = pd.DataFrame()
 
 # Apply augmentation functions and visualize after each
@@ -218,13 +218,13 @@ if DATA_SEPARATE:
     scaled_data = apply_and_visualize(original_data, apply_magnitude_scaling, "Scaling data", dir_path)
     # subsampled_data = apply_and_visualize(original_data, apply_temporal_subsampling, "Subsampling data", dir_path)
     jittered_data = apply_and_visualize(original_data, apply_jittering, "Jittered data", dir_path)
-    noisy_data = apply_and_visualize(original_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
+    # noisy_data = apply_and_visualize(original_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
     enhanced_data = apply_and_visualize(original_data, apply_laplace, "Laplace data", dir_path)
 
     # Concat them
     if SAVING_DATA_SEPARATE_CONCAT:
         concat_data = pd.concat(
-            [scaled_data, jittered_data, noisy_data, enhanced_data])
+            [scaled_data, jittered_data, enhanced_data])
         if concat_data.shape[0] % DATA_POINTS:
             print(f"File has {concat_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
@@ -233,7 +233,7 @@ if DATA_SEPARATE:
     # Concat them with original data
     if SAVING_DATA_SEPARATE_CONCAT_DATASET:
         concat_data = pd.concat(
-            [original_data, scaled_data, jittered_data, noisy_data, enhanced_data])
+            [original_data, scaled_data, jittered_data, enhanced_data])
         if concat_data.shape[0] % DATA_POINTS:
             print(f"File has {concat_data.shape[0]} rows, which is not a multiple of {DATA_POINTS}, so it will be ignored")
         else:
@@ -246,8 +246,8 @@ if DATA_COMPILE:
     # subsampled_data = apply_and_visualize(scaled_data, apply_temporal_subsampling, "Subsampling data", dir_path)
     scaled_data = apply_and_visualize(original_data, apply_magnitude_scaling, "Scaling data", dir_path)
     jittered_data = apply_and_visualize(scaled_data, apply_jittering, "Jittered data", dir_path)
-    noisy_data = apply_and_visualize(jittered_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
-    enhanced_data = apply_and_visualize(noisy_data, apply_laplace, "Laplace data", dir_path)
+    # noisy_data = apply_and_visualize(jittered_data, apply_gaussian_noise, "Gaussian noise data", dir_path)
+    enhanced_data = apply_and_visualize(jittered_data, apply_laplace, "Laplace data", dir_path)
     visualize_data(original_data, enhanced_data, 'Compiled data')
 
     if SAVING_DATA_COMPILE:
