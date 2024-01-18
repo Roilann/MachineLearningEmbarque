@@ -38,7 +38,7 @@ metrics_accuracy_precision_recall = ['accuracy', tf.keras.metrics.Precision(), t
 
 METRICS = metrics_precision_recall
 
-# Main parameters
+# Hyperparameters
 EPOCHS = 200
 BATCH_SIZE = 20
 
@@ -182,23 +182,52 @@ scores = model.evaluate(E_test_dataset, Y_test_dataset)
 print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
-plt.figure()
-plt.plot(history.history['recall'])
-plt.plot(history.history['val_recall'])
-plt.title('Model recall')
-plt.ylabel('Recall')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Val'], loc='upper left')
-plt.show()
+if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall or METRICS == metrics_binary_accuracy_auc:
+    auc_col = 'accuracy' if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall else 'auc'
+    val_auc_col = 'val_accuracy' if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall \
+        else 'val_auc'
+    plt.figure()
+    plt.plot(history.history[auc_col])
+    plt.plot(history.history[val_auc_col])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.show()
 
-plt.figure()
-plt.plot(history.history['precision'])
-plt.plot(history.history['val_precision'])
-plt.title('Model precision')
-plt.ylabel('Precision')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Val'], loc='upper left')
-plt.show()
+if METRICS == metrics_precision_recall or METRICS == metrics_accuracy_precision_recall:
+    rec_col = 'recall_1' if METRICS == metrics_accuracy_precision_recall else 'recall'
+    val_rec_col = 'val_recall_1' if METRICS == metrics_accuracy_precision_recall else 'val_recall'
+    plt.figure()
+    plt.plot(history.history[rec_col])
+    plt.plot(history.history[val_rec_col])
+    plt.title('Model recall')
+    plt.ylabel('Recall')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.show()
+
+if METRICS == metrics_precision_recall or METRICS == metrics_accuracy_precision_recall:
+    pre_col = 'precision_1' if METRICS == metrics_accuracy_precision_recall else 'precision'
+    val_pre_col = 'val_precision_1' if METRICS == metrics_accuracy_precision_recall else 'val_precision'
+    plt.figure()
+    plt.plot(history.history[pre_col])
+    plt.plot(history.history[val_pre_col])
+    plt.title('Model precision')
+    plt.ylabel('Precision')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.show()
+
+if METRICS == metrics_binary_accuracy_auc:
+    plt.figure()
+    plt.plot(history.history['binary_accuracy'])
+    plt.plot(history.history['val_binary_accuracy'])
+    plt.title('Model binary accuracy')
+    plt.ylabel('Binary Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.show()
 
 plt.figure()
 plt.plot(history.history['loss'])
@@ -219,23 +248,52 @@ if model_name != "n" and model_name != "":
     with open('../models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
 
-    plt.figure()
-    plt.plot(history.history['recall_1'])
-    plt.plot(history.history['val_recall'])
-    plt.title('Model recall')
-    plt.ylabel('Recall')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
+    if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall or METRICS == metrics_binary_accuracy_auc:
+        auc_col = 'accuracy' if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall else 'auc'
+        val_auc_col = 'val_accuracy' if METRICS == metrics_accuracy or METRICS == metrics_accuracy_precision_recall \
+            else 'val_auc'
+        plt.figure()
+        plt.plot(history.history[auc_col])
+        plt.plot(history.history[val_auc_col])
+        plt.title('Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Val'], loc='upper left')
+        plt.savefig('../models/' + model_name + '/' + model_name + '_accuracy_plot.png')
 
-    plt.figure()
-    plt.plot(history.history['precision'])
-    plt.plot(history.history['val_precision'])
-    plt.title('Model precision')
-    plt.ylabel('Precision')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Val'], loc='upper left')
-    plt.savefig('../models/' + model_name + '/' + model_name + '_precision_plot.png')
+    if METRICS == metrics_precision_recall or METRICS == metrics_accuracy_precision_recall:
+        rec_col = 'recall_1' if METRICS == metrics_accuracy_precision_recall else 'recall'
+        val_rec_col = 'val_recall_1' if METRICS == metrics_accuracy_precision_recall else 'val_recall'
+        plt.figure()
+        plt.plot(history.history[rec_col])
+        plt.plot(history.history[val_rec_col])
+        plt.title('Model recall')
+        plt.ylabel('Recall')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Val'], loc='upper left')
+        plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
+
+    if METRICS == metrics_precision_recall or METRICS == metrics_accuracy_precision_recall:
+        pre_col = 'precision_1' if METRICS == metrics_accuracy_precision_recall else 'precision'
+        val_pre_col = 'val_precision_1' if METRICS == metrics_accuracy_precision_recall else 'val_precision'
+        plt.figure()
+        plt.plot(history.history[pre_col])
+        plt.plot(history.history[val_pre_col])
+        plt.title('Model precision')
+        plt.ylabel('Precision')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Val'], loc='upper left')
+        plt.savefig('../models/' + model_name + '/' + model_name + '_precision_plot.png')
+
+    if METRICS == metrics_binary_accuracy_auc:
+        plt.figure()
+        plt.plot(history.history['binary_accuracy'])
+        plt.plot(history.history['val_binary_accuracy'])
+        plt.title('Model binary accuracy')
+        plt.ylabel('Binary Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Val'], loc='upper left')
+        plt.savefig('../models/' + model_name + '/' + model_name + '_binary_accuracy_plot.png')
 
     plt.figure()
     plt.plot(history.history['loss'])
@@ -246,4 +304,32 @@ if model_name != "n" and model_name != "":
     plt.legend(['Train', 'Val'], loc='upper left')
     plt.savefig('../models/' + model_name + '/' + model_name + '_loss_plot.png')
 
-    print("Model saved.")
+
+    last_folder = os.path.basename(os.path.dirname(file_selected))
+    file_name = os.path.basename(file_selected)
+
+    dataset_path = os.path.join(last_folder, file_name)
+
+    # Markdown content with variables
+    markdown_content = f"""
+    # Additional info for {model_name}
+
+    This is a list of the parameters used for {model_name}
+    
+    dataset = {dataset_path}
+    optimizer = {OPTIMIZER}
+    loss = {LOSS}
+    metrics = {METRICS}
+    batch size = {BATCH_SIZE}
+    epochs = {EPOCHS}
+    
+    """
+
+    # Specify the file path
+    readme_path = os.path.join('../models', model_name, 'readme.md')
+
+    # Write the Markdown content to the file
+    with open(readme_path, "w") as file:
+        file.write(markdown_content)
+
+    print(f"Markdown file generated at: {readme_path}")
