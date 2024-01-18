@@ -43,6 +43,23 @@ EPOCHS = 200
 BATCH_SIZE = 20
 
 
+def result_to_markdown(existing_markdown, metric_names, scores):
+    # Check the number of data items
+    num_item = len(metric_names)
+    num_score = len(scores)
+    # Start with the existing Markdown content
+    markdown_content = existing_markdown.strip() + "\n"
+    if num_item == num_score:
+        # Generate list items based on the number of data items
+        if num_item > 0:
+            markdown_content += "\n"
+            for i, metric_name in enumerate(metric_names):
+                markdown_content += f"- {metric_name}: {scores[i]*100:.3f}%\n"
+        else:
+            markdown_content += "\nNo data available.\n"
+
+    return markdown_content
+
 def visualize_error(error_lot, data):
     # Ensure data is a 2D NumPy array
     if not isinstance(data, np.ndarray) or data.ndim != 2:
@@ -304,26 +321,27 @@ if model_name != "n" and model_name != "":
     plt.legend(['Train', 'Val'], loc='upper left')
     plt.savefig('../models/' + model_name + '/' + model_name + '_loss_plot.png')
 
-
     last_folder = os.path.basename(os.path.dirname(file_selected))
     file_name = os.path.basename(file_selected)
-
     dataset_path = os.path.join(last_folder, file_name)
 
     # Markdown content with variables
     markdown_content = f"""
-    # Additional info for {model_name}
+# Additional info for {model_name}
 
-    This is a list of the parameters used for {model_name}
-    
-    dataset = {dataset_path}
-    optimizer = {OPTIMIZER}
-    loss = {LOSS}
-    metrics = {METRICS}
-    batch size = {BATCH_SIZE}
-    epochs = {EPOCHS}
-    
+This is a list of the parameters used for {model_name}
+
+dataset = {dataset_path}
+optimizer = {OPTIMIZER}
+loss = {LOSS}
+metrics = {METRICS}
+batch size = {BATCH_SIZE}
+epochs = {EPOCHS}
+
+Results :     
     """
+
+    markdown_content = result_to_markdown(markdown_content, model.metrics_names, scores)
 
     # Specify the file path
     readme_path = os.path.join('../models', model_name, 'readme.md')
