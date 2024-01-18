@@ -16,8 +16,8 @@ from utils import DATA_POINTS, print_dataset
 # Settings to modify in the AI
 
 # Split parameters
-TEST_SPLIT = 0.2
-VAL_SPLIT = 0.2
+TEST_SPLIT = 0.3
+VAL_SPLIT = 0.5
 
 # Optimizers
 rms_optimizer = tf.keras.optimizers.RMSprop(momentum=0.1)
@@ -26,9 +26,9 @@ OPTIMIZER = rms_optimizer
 
 # Loss
 
-sparse_loss = tf.keras.losses.SparseCategoricalCrossentropy()
+binary_crossentropy_loss = tf.keras.losses.BinaryCrossentropy()
 
-LOSS = sparse_loss
+LOSS = binary_crossentropy_loss
 
 # Metrics
 metrics_accuracy = ['accuracy']
@@ -36,11 +36,11 @@ metrics_binary_accuracy_auc = [tf.keras.metrics.BinaryAccuracy(), tf.keras.metri
 metrics_precision_recall = [tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
 metrics_accuracy_precision_recall = ['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
 
-METRICS = metrics_accuracy_precision_recall
+METRICS = metrics_precision_recall
 
 # Main parameters
 EPOCHS = 200
-BATCH_SIZE = 60
+BATCH_SIZE = 20
 
 
 def visualize_error(error_lot, data):
@@ -76,10 +76,8 @@ seed = int(time.time())
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
-# Navigate to the parent directory
-parent_directory = os.path.dirname(os.getcwd())
-# Construct the path to the output folder in the parent directory
-dataset_folder_path = os.path.join(parent_directory, "datasets")
+parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dataset_folder_path = parent_directory + "/datasets/"
 
 files_path = [f for f in pathlib.Path(dataset_folder_path).glob("*.csv")]
 files_path = files_path + [f for f in pathlib.Path(dataset_folder_path).glob("*/concat_data*.csv")]
@@ -150,7 +148,7 @@ early_stopping = EarlyStopping(
 # L'ajout de ReduceLROnPlateau est a essayer pour voir si cela améliore les résultats
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss',
-    factor=0.2,
+    factor=0.01,
     patience=20,
     verbose=1,
     mode='min',
@@ -169,15 +167,15 @@ model = tf.keras.models.Sequential([
 ])
 
 model.compile(optimizer=OPTIMIZER,
-              loss='binary_crossentropy',
+              loss=LOSS,
               metrics=METRICS)
 
 history = model.fit(E_train_dataset,
                     Y_train_dataset,
-                    shuffle=False,
+                    shuffle=True,
                     epochs=EPOCHS,
                     batch_size=BATCH_SIZE,
-                    validation_split=0.2,
+                    validation_split=VAL_SPLIT,
                     callbacks=[early_stopping, reduce_lr])
 
 scores = model.evaluate(E_test_dataset, Y_test_dataset)
@@ -185,17 +183,8 @@ print("\nEvaluation sur le test data %s: %.2f - %s: %.2f%% " % (
     model.metrics_names[0], scores[0], model.metrics_names[1], scores[1] * 100))
 
 plt.figure()
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('Model accuracy')
-plt.ylabel('Accuracy')
-plt.xlabel('Epoch')
-plt.legend(['Train', 'Val'], loc='upper left')
-plt.show()
-
-plt.figure()
-plt.plot(history.history['recall_1'])
-plt.plot(history.history['val_recall_1'])
+plt.plot(history.history['recall'])
+plt.plot(history.history['val_recall'])
 plt.title('Model recall')
 plt.ylabel('Recall')
 plt.xlabel('Epoch')
@@ -203,8 +192,8 @@ plt.legend(['Train', 'Val'], loc='upper left')
 plt.show()
 
 plt.figure()
-plt.plot(history.history['precision_1'])
-plt.plot(history.history['val_precision_1'])
+plt.plot(history.history['precision'])
+plt.plot(history.history['val_precision'])
 plt.title('Model precision')
 plt.ylabel('Precision')
 plt.xlabel('Epoch')
@@ -230,18 +219,9 @@ if model_name != "n" and model_name != "":
     with open('../models/' + model_name + '/' + model_name + '.json', "w") as json_file:
         json_file.write(model_structure)
 
-    # plt.figure()
-    # plt.plot(history.history['accuracy'])
-    # plt.plot(history.history['val_accuracy'])
-    # plt.title('Model accuracy')
-    # plt.ylabel('Accuracy')
-    # plt.xlabel('Epoch')
-    # plt.legend(['Train', 'Val'], loc='upper left')
-    # plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
-
     plt.figure()
     plt.plot(history.history['recall_1'])
-    plt.plot(history.history['val_recall_1'])
+    plt.plot(history.history['val_recall'])
     plt.title('Model recall')
     plt.ylabel('Recall')
     plt.xlabel('Epoch')
@@ -249,8 +229,8 @@ if model_name != "n" and model_name != "":
     plt.savefig('../models/' + model_name + '/' + model_name + '_recall_plot.png')
 
     plt.figure()
-    plt.plot(history.history['precision_1'])
-    plt.plot(history.history['val_precision_1'])
+    plt.plot(history.history['precision'])
+    plt.plot(history.history['val_precision'])
     plt.title('Model precision')
     plt.ylabel('Precision')
     plt.xlabel('Epoch')
