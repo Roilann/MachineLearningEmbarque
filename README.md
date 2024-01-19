@@ -10,13 +10,13 @@ Pour faciliter le travail, nous utilisons un dépôt GitHub : https://github.com
 
 Vous pouvez retrouver les modèles dans le dossier `models`, avec les courbes d'apprentissage en image.
 
-1. dataset_v1_rms_01_binary_crossentropy_e200_b15_vp02
-2. dataset_v1_rms_01_binary_crossentropy_e200_b20_vp02
-3. dataset_v1_adam_05_binary_crossentropy_e400_b30_vp02
+1. dataset_v3_rms_001_bc_e200_b20_vp02_EXPERIMENTAL_metrics_precision_recall_early_stopping_reduce_lr_on_plateau
+2. dataset_v1_rms_01_binary_crossentropy_e200_b15_vp02
+3. dataset_v1_rms_01_binary_crossentropy_e200_b20_vp02
+4. dataset_v1_adam_05_binary_crossentropy_e400_b30_vp02
 
 Hors catégorie : 
 - dataset_v1_rms_001_m01_binary_crossentropy_e200_b20_vp02_EXPERIMENTAL_metrics_auc_l2_early_stopping_redure_lr_on_plateau
-- dataset_v3_rms_001_bc_e200_b20_vp02_EXPERIMENTAL_metrics_precision_recall_early_stopping_reduce_lr_on_plateau
 
 ## Etat actuel du projet
 Nous avons pu enregistrer des premiers modèles contenant des paramètres déterminés à l'aide de multiples itérations 
